@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react'
 import styles from './Splash.module.css'
 
-// ── TODO: rellena estos dos valores ──────────────────────────────────────────
-// Nombre exacto del archivo SVG que dejes en hh-sim/public/
+// ── Branding de la pantalla de inicio ────────────────────────────────────────
+// Logo institucional: archivo SVG en hh-sim/public/. BASE_URL resuelve la
+// subruta correcta en producción (GitHub Pages) y '/' en dev/tests.
 export const SPLASH_LOGO_SRC = `${import.meta.env.BASE_URL}iztacala_01.svg`
-// Texto de la institución que aparece bajo el título (vacío = no se muestra)
+// Texto de la institución que aparece bajo el título (vacío = no se muestra).
 export const SPLASH_INSTITUTION = 'COORDINACIÓN DE EDUCACIÓN A DISTANCIA'
 // ─────────────────────────────────────────────────────────────────────────────
 

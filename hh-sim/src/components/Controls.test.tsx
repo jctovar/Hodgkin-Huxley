@@ -68,6 +68,32 @@ describe('Controls', () => {
     expect(h.onPatch).toHaveBeenCalledWith({ method: 'rk4' })
   })
 
+  it('emits patches from the conductance and temperature sliders', () => {
+    const h = setup()
+    fireEvent.change(screen.getByLabelText(/ḡNa/), { target: { value: '90' } })
+    fireEvent.change(screen.getByLabelText(/ḡK/), { target: { value: '40' } })
+    fireEvent.change(screen.getByLabelText(/Temperatura/), { target: { value: '20' } })
+    expect(h.onPatch).toHaveBeenCalledWith({ gNa: 90 })
+    expect(h.onPatch).toHaveBeenCalledWith({ gK: 40 })
+    expect(h.onPatch).toHaveBeenCalledWith({ temp: 20 })
+  })
+
+  it('changes the stimulus protocol and the integration step', () => {
+    const h = setup()
+    fireEvent.change(screen.getByLabelText('Estímulo'), { target: { value: 'ramp' } })
+    fireEvent.change(screen.getByLabelText('Δt (ms)'), { target: { value: '0.05' } })
+    expect(h.onPatch).toHaveBeenCalledWith({ protocol: 'ramp' })
+    expect(h.onPatch).toHaveBeenCalledWith({ dt: 0.05 })
+  })
+
+  it('warns when Euler runs with a large Δt and not otherwise', () => {
+    const { unmount } = setup({ control: { ...DEFAULT_CONTROL, method: 'euler', dt: 0.05 } })
+    expect(screen.getByText(/puede ser inestable/)).toBeInTheDocument()
+    unmount()
+    setup({ control: { ...DEFAULT_CONTROL, method: 'rk4', dt: 0.05 } })
+    expect(screen.queryByText(/puede ser inestable/)).not.toBeInTheDocument()
+  })
+
   it('wires the record and export buttons', () => {
     const h = setup()
     fireEvent.click(screen.getByText('● Grabar'))
