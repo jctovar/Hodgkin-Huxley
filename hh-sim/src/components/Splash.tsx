@@ -3,7 +3,7 @@ import styles from './Splash.module.css'
 
 // ── TODO: rellena estos dos valores ──────────────────────────────────────────
 // Nombre exacto del archivo SVG que dejes en hh-sim/public/
-export const SPLASH_LOGO_SRC = '/iztacala_01.svg'
+export const SPLASH_LOGO_SRC = `${import.meta.env.BASE_URL}iztacala_01.svg`
 // Texto de la institución que aparece bajo el título (vacío = no se muestra)
 export const SPLASH_INSTITUTION = 'COORDINACIÓN DE EDUCACIÓN A DISTANCIA'
 // ─────────────────────────────────────────────────────────────────────────────
