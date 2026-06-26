@@ -1,5 +1,11 @@
 # Simulador de Hodgkin–Huxley
 
+[![Deploy to GitHub Pages](https://github.com/jctovar/Hodgkin-Huxley/actions/workflows/pages.yml/badge.svg)](https://github.com/jctovar/Hodgkin-Huxley/actions/workflows/pages.yml)
+[![Release](https://github.com/jctovar/Hodgkin-Huxley/actions/workflows/release.yml/badge.svg)](https://github.com/jctovar/Hodgkin-Huxley/releases)
+[![latest release](https://img.shields.io/github/v/release/jctovar/Hodgkin-Huxley)](https://github.com/jctovar/Hodgkin-Huxley/releases)
+
+> **Demo en vivo:** https://jctovar.github.io/Hodgkin-Huxley/
+
 Simulador interactivo del **potencial de acción de una neurona** según el modelo de
 Hodgkin & Huxley (1952), a fidelidad biofísica completa. La interfaz imita un
 osciloscopio de electrofisiología: la traza de potencial de membrana (Vₘ) es la
@@ -14,6 +20,9 @@ análisis cuantitativo (exportación de datos, curvas I–F, plano de fase).
 ---
 
 ## Características
+
+**Pantalla de inicio institucional** (splash) con el logo y crédito, que se cierra
+sola (clic / `Enter` / `Escape` o auto-cierre) y respeta `prefers-reduced-motion`.
 
 **Visualización en tiempo real** (6 paneles sobre `<canvas>`, dibujo imperativo sin
 re-renders de React):
@@ -116,21 +125,22 @@ tests de umbral de disparo, efecto de la temperatura y forma de la espiga.
 
 ```text
 .
-├── HodgkinHuxley.jsx        # componente original (referencia, ~520 líneas)
-├── DEVELOPMENT.md           # especificación del proyecto (español)
-├── AGENTS.md                # notas para asistentes de IA que editen el repo
-└── hh-sim/                  # la app (Vite + React + TS)
+├── HodgkinHuxley.jsx          # componente original (referencia, ~520 líneas)
+├── DEVELOPMENT.md             # especificación del proyecto (español)
+├── AGENTS.md                  # notas para asistentes de IA que editen el repo
+├── .github/workflows/         # CI: pages.yml (deploy) + release.yml (versiones)
+└── hh-sim/                    # la app (Vite + React + TS)
     ├── legacy/HodgkinHuxley.jsx
     └── src/
-        ├── sim/             # motor de simulación puro (sin React, 100% testeado)
-        │   ├── hh.ts            # constantes, tasas, derivadas, corriente, φ
-        │   ├── integrators.ts   # euler + rk4
-        │   ├── presets.ts       # control por defecto + escenarios
+        ├── sim/               # motor de simulación puro (sin React, 100% testeado)
+        │   ├── hh.ts              # constantes, tasas, derivadas, corriente, φ
+        │   ├── integrators.ts     # euler + rk4
+        │   ├── presets.ts         # control por defecto + escenarios
         │   └── types.ts
-        ├── components/      # Scope, PhasePlane, SteadyState, IFCurve, Controls, Readouts
+        ├── components/        # Splash, Scope, PhasePlane, SteadyState, IFCurve, Controls, Readouts
         ├── hooks/useSimulation.ts   # bucle rAF, buffers, refs, estímulos
-        ├── lib/             # scopeDraw, exportCsv, iFCurve
-        └── styles/theme.ts  # paleta de colores
+        ├── lib/               # scopeDraw, exportCsv, iFCurve
+        └── styles/theme.ts    # paleta de colores
 ```
 
 ---
@@ -147,11 +157,35 @@ tests de umbral de disparo, efecto de la temperatura y forma de la espiga.
 
 ---
 
+## Despliegue y releases
+
+La app se publica automáticamente mediante GitHub Actions (no hay servidor: es un
+sitio estático generado por Vite).
+
+- **GitHub Pages** — en cada *push* a `main`, el workflow
+  [`.github/workflows/pages.yml`](./.github/workflows/pages.yml) ejecuta
+  `lint → typecheck → tests → build` y, si todo pasa, despliega a
+  **https://jctovar.github.io/Hodgkin-Huxley/** (con `base: '/Hodgkin-Huxley/'`).
+- **Releases** — al crear un tag `vX.Y.Z`, el workflow
+  [`.github/workflows/release.yml`](./.github/workflows/release.yml) compila y
+  publica un [release](https://github.com/jctovar/Hodgkin-Huxley/releases) con el
+  `dist/` empaquetado (`hh-sim-dist.zip` / `.tar.gz`) y *changelog* autogenerado.
+
+Para generar una nueva versión:
+
+```bash
+git tag -a v0.2.0 -m "v0.2.0"
+git push origin v0.2.0
+```
+
+---
+
 ## Estado y roadmap
 
-Migración desde el `.jsx` monolítico completada. Implementado: integrador RK4,
-exportación CSV, plano de fase, curva I–F, panel de activación estacionaria,
-protocolos de estímulo, persistencia y accesibilidad básica.
+Migración desde el `.jsx` monolítico completada y **desplegada en producción**
+(GitHub Pages + releases por tag). Implementado: integrador RK4, exportación CSV,
+plano de fase, curva I–F, panel de activación estacionaria, protocolos de estímulo,
+persistencia, accesibilidad básica y pantalla de inicio institucional.
 
 Pendiente (DEVELOPMENT.md §4.4): `OffscreenCanvas`/Web Worker para grabaciones muy
 largas, nulclinas adicionales en el plano de fase y más tests de regresión.
