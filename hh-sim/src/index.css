@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #0b0f12;
+  --panel: #141b21;
+  --panel2: #1a232a;
+  --edge: rgba(140, 160, 170, 0.14);
+  --grid: rgba(130, 150, 160, 0.1);
+  --ink: #e9eef1;
+  --muted: #7d8e98;
+  color-scheme: dark;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ---- buttons (global; reused across controls) ---- */
+.btn {
+  background: var(--panel2);
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.btn:hover {
+  border-color: rgba(160, 180, 190, 0.4);
+  background: #202a32;
+}
+
+.btn:focus-visible {
+  outline: 2px solid #ffd166;
+  outline-offset: 2px;
+}
+
+.btn.primary {
+  background: #223;
+  border-color: rgba(167, 139, 250, 0.45);
+  color: var(--ink);
+}
+
+.btn.primary:hover {
+  background: #2a2a44;
+}
+
+.btn.pulse {
+  width: 100%;
+  background: rgba(167, 139, 250, 0.14);
+  border-color: rgba(167, 139, 250, 0.5);
+  color: #d9ccff;
+  font-weight: 500;
+}
+
+.btn.pulse:hover {
+  background: rgba(167, 139, 250, 0.24);
+}
+
+.btn.pulse:active {
+  transform: translateY(1px);
+}
+
+.btn.chip-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+}

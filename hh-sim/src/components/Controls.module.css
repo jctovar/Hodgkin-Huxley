@@ -1,0 +1,153 @@
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sliderHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sliderLabel {
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.sub {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 11px;
+}
+
+.sliderVal {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.unit {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.rng {
+  width: 100%;
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  appearance: none;
+  cursor: pointer;
+}
+
+.rng::-webkit-slider-thumb {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.rng::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--bg);
+}
+
+.presetLabel {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.advanced {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.select {
+  background: var(--panel2);
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.select:focus-visible {
+  outline: 2px solid #ffd166;
+  outline-offset: 2px;
+}
+
+.warn {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 11px;
+  color: #ffb380;
+}
+
+:global(.btn.rec) {
+  background: rgba(255, 107, 92, 0.16);
+  border-color: rgba(255, 107, 92, 0.5);
+  color: #ffb3a8;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gateFill {
+    transition: none !important;
+  }
+}

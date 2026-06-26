@@ -1,0 +1,57 @@
+.readBox {
+  background: var(--panel2);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.readRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.readVal {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.gateBars {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.gateCol {
+  flex: 1;
+}
+
+.gateTop {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.gateNum {
+  color: var(--muted);
+}
+
+.gateTrack {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.gateFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 80ms linear;
+}
