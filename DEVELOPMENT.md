@@ -287,7 +287,17 @@ El build de producción está configurado con `base: '/Hodgkin-Huxley/'` en
 ese prefijo, por lo que el proxy debe servir los archivos exactamente en esa
 subruta.
 
-### Paso 1 — generar el build
+Hay dos modos de despliegue:
+
+- **6.A — Servir el `dist/` desde disco** (el servidor aloja los archivos).
+- **6.B — Proxy inverso a GitHub Pages** (el servidor solo reenvía; no hace
+  falta desplegar el `dist/`).
+
+---
+
+### 6.A — Servir el `dist/` desde disco
+
+#### Paso 1 — generar el build
 
 ```bash
 cd hh-sim
@@ -301,7 +311,7 @@ Copia el contenido de `dist/` al directorio raíz que servirá el proxy:
 sudo cp -r dist/* /var/www/hodgkin-huxley/
 ```
 
-### Paso 2 — nginx
+#### Paso 2 — nginx
 
 ```nginx
 server {
@@ -329,7 +339,7 @@ server {
 
 Con TLS (bloque `server` adicional que escucha en 443 + `ssl_certificate`).
 
-### Paso 2 — Apache
+#### Paso 2 — Apache
 
 Habilita `mod_alias` y `mod_rewrite`:
 
@@ -368,6 +378,106 @@ sudo a2enmod alias rewrite
 ```apache
 Options -Indexes
 FallbackResource /Hodgkin-Huxley/index.html
+```
+
+---
+
+### 6.B — Proxy inverso a GitHub Pages
+
+Útil cuando ya publicas en GitHub Pages
+(`https://jctovar.github.io/Hodgkin-Huxley/`) y solo quieres exponerlo bajo un
+dominio institucional **sin desplegar el `dist/`** en tu servidor. nginx
+reenvía cada petición a Pages.
+
+Funciona limpiamente porque el `base` de Vite (`/Hodgkin-Huxley/`) coincide con
+la subruta que sirves: las URLs de los assets son idénticas en ambos lados y no
+hace falta reescribir rutas.
+
+```nginx
+# ── fuera del bloque server: zona de caché para los assets de Pages ──
+# (llevan hash en el nombre → inmutables; cachearlos quita latencia y carga)
+proxy_cache_path /var/cache/nginx/ghpages levels=1:2 keys_zone=ghpages:10m
+                 max_size=200m inactive=24h use_temp_path=off;
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name cursos.iztacala.unam.mx;
+
+    # ── TLS institucional ya existente ──
+    # ssl_certificate     /etc/ssl/certs/cursos.iztacala.unam.mx.crt;
+    # ssl_certificate_key /etc/ssl/private/cursos.iztacala.unam.mx.key;
+
+    # ruta sin barra final → con barra (GitHub la exige)
+    location = /Hodgkin-Huxley {
+        return 301 /Hodgkin-Huxley/;
+    }
+
+    location /Hodgkin-Huxley/ {
+        # (1) CRÍTICO: GitHub Pages enruta por el header Host. Debe ser el
+        #     dominio de Pages, no el tuyo, o devuelve un 404.
+        proxy_set_header Host jctovar.github.io;
+
+        # (2) CRÍTICO: SNI correcto en el handshake TLS hacia Fastly/GitHub.
+        #     Sin esto el upstream presenta el certificado equivocado.
+        proxy_ssl_server_name on;
+        proxy_ssl_protocols   TLSv1.2 TLSv1.3;
+
+        # verificación del certificado del upstream (recomendado)
+        proxy_ssl_verify              on;
+        proxy_ssl_verify_depth        2;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+
+        # cabeceras de reenvío informativas
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+
+        # (3) el base coincide en ambos lados → se reenvía la URI tal cual.
+        #     Sin URI en proxy_pass, nginx preserva /Hodgkin-Huxley/... íntegro.
+        proxy_pass https://jctovar.github.io;
+
+        # (4) reescribe el Location de las redirecciones que emita GitHub
+        proxy_redirect https://jctovar.github.io/ /;
+
+        # ── caché ──
+        proxy_cache            ghpages;
+        proxy_cache_valid      200 301 302 1h;
+        proxy_cache_valid      404 1m;
+        proxy_cache_revalidate on;
+        proxy_cache_lock       on;
+        proxy_cache_use_stale  error timeout updating
+                               http_500 http_502 http_503 http_504;
+        add_header X-Cache-Status $upstream_cache_status always;
+
+        # timeouts razonables
+        proxy_connect_timeout 5s;
+        proxy_read_timeout    30s;
+    }
+}
+```
+
+**Las cuatro directivas que no se pueden omitir:**
+
+1. **`proxy_set_header Host jctovar.github.io`** — Pages decide qué sitio
+   servir según el `Host`; con el dominio propio responde 404.
+2. **`proxy_ssl_server_name on`** — el upstream es HTTPS sobre la CDN de Fastly;
+   sin SNI el handshake falla o llega el certificado de otro sitio.
+3. **Misma subruta `/Hodgkin-Huxley/`** en `base` y en la `location` — así los
+   assets (incluido el SVG del splash) resuelven sin reescritura.
+4. **`proxy_redirect`** — normaliza las redirecciones de GitHub para no filtrar
+   `jctovar.github.io` al cliente.
+
+**Resolución DNS:** con `proxy_pass https://jctovar.github.io;` nginx resuelve
+la IP al cargar la configuración. Las IPs de Pages (Fastly) rotan, pero el
+nombre sigue válido; un `nginx -s reload` tras incidencias basta. Para
+re-resolución dinámica, usa un bloque `resolver` con la URL en una variable.
+
+**Verificación** tras recargar (`nginx -t && nginx -s reload`):
+
+```bash
+curl -I https://cursos.iztacala.unam.mx/Hodgkin-Huxley/
+curl -I https://cursos.iztacala.unam.mx/Hodgkin-Huxley/iztacala_01.svg
+# ambas → 200; en la segunda visita, X-Cache-Status: HIT
 ```
 
 ### Nota sobre la subruta
