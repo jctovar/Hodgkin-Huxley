@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hh-sim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: hh-sim/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Bundle dist
+        working-directory: hh-sim
+        run: |
+          mkdir -p artifact
+          tar -czf artifact/hh-sim-dist.tar.gz -C dist .
+          zip -r -q artifact/hh-sim-dist.zip dist
+      - name: Create GitHub release
+        working-directory: hh-sim
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            artifact/hh-sim-dist.tar.gz artifact/hh-sim-dist.zip \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes
