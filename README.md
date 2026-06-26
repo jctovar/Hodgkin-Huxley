@@ -114,10 +114,12 @@ npm run coverage   # cobertura
 
 Un único archivo: `npx vitest run src/sim/hh.test.ts`.
 
-El **núcleo numérico** (`src/sim/` y `src/lib/`) está al **100 % de cobertura** e
-incluye el test de regresión de DEVELOPMENT.md §4.1 (RK4 con Δt = 0.025 ms frente a
-Euler con Δt = 0.01 ms → coincidencia en el pico dentro de ±0.5 mV), además de
-tests de umbral de disparo, efecto de la temperatura y forma de la espiga.
+El **núcleo numérico** (`src/sim/`) está al **100 % de cobertura** e incluye el
+test de regresión de DEVELOPMENT.md §4.1 (RK4 con Δt = 0.025 ms frente a Euler con
+Δt = 0.01 ms → coincidencia en el pico dentro de ±0.5 mV), además de tests de
+umbral de disparo, efecto de la temperatura y forma de la espiga. El bucle de
+simulación (`useSimulation`), el dibujo de osciloscopio (`scopeDraw`) y los
+componentes también están cubiertos; la cobertura global supera el **96 %**.
 
 ---
 
@@ -239,3 +241,9 @@ largas, nulclinas adicionales en el plano de fase y más tests de regresión.
 - Hodgkin, A. L. & Huxley, A. F. (1952). *A quantitative description of membrane
   current and its application to conduction and excitation in nerve.* Journal of
   Physiology, 117(4), 500–544.
+
+---
+
+## Licencia
+
+[MIT](./LICENSE) © Juan Carlos Tovar Gomez.
