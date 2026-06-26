@@ -1,5 +1,7 @@
+import { useCallback, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useSimulation } from './hooks/useSimulation'
+import { Splash } from './components/Splash'
 import { Scope } from './components/Scope'
 import { PhasePlane } from './components/PhasePlane'
 import { SteadyState } from './components/SteadyState'
@@ -23,6 +25,9 @@ function Chip({ label, value, color }: { label: string; value: ReactNode; color:
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true)
+  // stable so the Splash auto-dismiss timer isn't reset by App re-renders
+  const dismissSplash = useCallback(() => setShowSplash(false), [])
   const {
     control,
     running,
@@ -44,6 +49,7 @@ export default function App() {
 
   return (
     <div className={styles.root}>
+      {showSplash && <Splash onDismiss={dismissSplash} />}
       <header className={styles.header}>
         <div>
           <div className={styles.kicker}>Modelo de Hodgkin–Huxley · 1952</div>

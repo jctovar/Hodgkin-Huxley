@@ -9,9 +9,16 @@ function tick(n: number): void {
   })
 }
 
+/** The Splash overlay is shown on every App mount; dismiss it for assertions. */
+function dismissSplash() {
+  const dialog = screen.queryByRole('dialog')
+  if (dialog) fireEvent.click(dialog)
+}
+
 describe('App', () => {
   it('renders the header, scopes and all preset buttons', () => {
     render(<App />)
+    dismissSplash()
     expect(screen.getByText('Potencial de acción de una neurona')).toBeInTheDocument()
     expect(screen.getByText('Reposo')).toBeInTheDocument()
     expect(screen.getByText('Tren de disparos')).toBeInTheDocument()
@@ -24,11 +31,13 @@ describe('App', () => {
 
   it('runs the animation loop without throwing when rAF is flushed', () => {
     render(<App />)
+    dismissSplash()
     expect(() => tick(30)).not.toThrow()
   })
 
   it('fires spikes under the "Tren de disparos" preset', () => {
     render(<App />)
+    dismissSplash()
     fireEvent.click(screen.getByText('Tren de disparos'))
     // iStim = 10 µA/cm² → repetitive firing; drive ~48 ms of simulated time
     tick(80)
