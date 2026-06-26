@@ -178,6 +178,48 @@ git tag -a v0.2.0 -m "v0.2.0"
 git push origin v0.2.0
 ```
 
+### Proxy inverso (nginx / Apache)
+
+El build asume que la app vive en `/Hodgkin-Huxley/`. Para servirla desde tu
+propio servidor, copia `hh-sim/dist/` a un directorio del host y configura el
+proxy:
+
+**nginx:**
+
+```nginx
+location /Hodgkin-Huxley/ {
+    alias /var/www/hodgkin-huxley/;
+    try_files $uri $uri/ /Hodgkin-Huxley/index.html;
+
+    location ~* \.(js|css|svg|ico|woff2?)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+**Apache** (`VirtualHost` o `.htaccess` en el directorio del `dist/`):
+
+```apache
+Alias /Hodgkin-Huxley /var/www/hodgkin-huxley
+
+<Directory /var/www/hodgkin-huxley>
+    Options -Indexes
+    Require all granted
+    FallbackResource /Hodgkin-Huxley/index.html
+</Directory>
+```
+
+Si prefieres servir la app en la raíz del dominio (`/`), cambia en
+`hh-sim/vite.config.ts`:
+
+```ts
+base: command === 'build' ? '/' : '/',
+```
+
+y ajusta las rutas del proxy en consecuencia. La guía completa (con TLS,
+cabeceras de caché y `.htaccess`) está en [`DEVELOPMENT.md §6`](./DEVELOPMENT.md).
+
 ---
 
 ## Estado y roadmap
