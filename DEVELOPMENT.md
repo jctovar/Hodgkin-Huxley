@@ -280,7 +280,110 @@ Sugerencia de orden de trabajo: migrar la física a `hh.ts` con tests (sección
 
 ---
 
-## 6. Referencias
+## 6. Despliegue detrás de un proxy inverso (nginx / Apache)
+
+El build de producción está configurado con `base: '/Hodgkin-Huxley/'` en
+`vite.config.ts`. Todos los assets, el manifest y las rutas internas asumen
+ese prefijo, por lo que el proxy debe servir los archivos exactamente en esa
+subruta.
+
+### Paso 1 — generar el build
+
+```bash
+cd hh-sim
+npm run build   # genera hh-sim/dist/
+```
+
+Copia el contenido de `dist/` al directorio raíz que servirá el proxy:
+
+```bash
+# ejemplo: /var/www/hodgkin-huxley/
+sudo cp -r dist/* /var/www/hodgkin-huxley/
+```
+
+### Paso 2 — nginx
+
+```nginx
+server {
+    listen 80;
+    server_name tu-dominio.example.com;
+
+    # Redirigir HTTP → HTTPS si usas TLS
+    # return 301 https://$host$request_uri;
+
+    location /Hodgkin-Huxley/ {
+        alias /var/www/hodgkin-huxley/;
+
+        # La app no usa enrutamiento cliente (no hay React Router),
+        # pero el fallback a index.html evita 404 en recarga directa.
+        try_files $uri $uri/ /Hodgkin-Huxley/index.html;
+
+        # Cabeceras de caché recomendadas para SPA estática
+        location ~* \.(js|css|svg|ico|woff2?)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+}
+```
+
+Con TLS (bloque `server` adicional que escucha en 443 + `ssl_certificate`).
+
+### Paso 2 — Apache
+
+Habilita `mod_alias` y `mod_rewrite`:
+
+```bash
+sudo a2enmod alias rewrite
+```
+
+`VirtualHost` o `.htaccess` en `/var/www/hodgkin-huxley/`:
+
+**Opción A — VirtualHost:**
+
+```apache
+<VirtualHost *:80>
+    ServerName tu-dominio.example.com
+
+    Alias /Hodgkin-Huxley /var/www/hodgkin-huxley
+
+    <Directory /var/www/hodgkin-huxley>
+        Options -Indexes
+        AllowOverride None
+        Require all granted
+
+        # Fallback a index.html para recarga directa
+        FallbackResource /Hodgkin-Huxley/index.html
+    </Directory>
+
+    # Caché agresiva para assets con hash en el nombre
+    <FilesMatch "\.(js|css|svg|ico|woff2?)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+    </FilesMatch>
+</VirtualHost>
+```
+
+**Opción B — `.htaccess`** (si no tienes acceso al VirtualHost):
+
+```apache
+Options -Indexes
+FallbackResource /Hodgkin-Huxley/index.html
+```
+
+### Nota sobre la subruta
+
+Si necesitas servir la app en la raíz del dominio (`/`) en lugar de
+`/Hodgkin-Huxley/`, cambia en `vite.config.ts`:
+
+```ts
+base: command === 'build' ? '/' : '/',
+```
+
+y ajusta en consecuencia la configuración del proxy.
+
+---
+
+## 7. Referencias
 
 - Hodgkin, A. L. & Huxley, A. F. (1952). *A quantitative description of membrane
   current and its application to conduction and excitation in nerve.* Journal of
